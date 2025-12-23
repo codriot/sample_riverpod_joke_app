@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../domain/entities/joke.dart';
@@ -10,9 +11,12 @@ import '../datasources/remote_joke_datasource.dart';
 /// Domain katmanındaki interface'i implement eder ve data source'u kullanır
 /// Bu sayede domain katmanı veri kaynağından bağımsız kalır
 /// Exception'ları yakalayıp Failure'a dönüştürür
+/// @LazySingleton - Interface'e register eder
+@LazySingleton(as: JokeRepository)
 class JokeRepositoryImpl implements JokeRepository {
   final RemoteJokeDataSource dataSource;
 
+  /// Injectable otomatik olarak RemoteJokeDataSource'u inject eder
   JokeRepositoryImpl(this.dataSource);
 
   @override
