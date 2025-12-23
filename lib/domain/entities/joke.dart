@@ -1,6 +1,9 @@
+import 'package:equatable/equatable.dart';
+
 /// Domain katmanındaki Joke entity'si
 /// Bu katman iş mantığını temsil eder ve framework'lerden bağımsızdır
-class Joke {
+/// Equatable ile value equality otomatik sağlanır (==, hashCode)
+class Joke extends Equatable {
   final int id;
   final String setup; // Espri sorusu
   final String punchline; // Espri cevabı
@@ -9,12 +12,8 @@ class Joke {
   const Joke({required this.id, required this.setup, required this.punchline, required this.category});
 
   @override
-  String toString() => 'Joke(id: $id, setup: $setup, punchline: $punchline)';
+  List<Object?> get props => [id, setup, punchline, category];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is Joke && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  String toString() => 'Joke(id: $id, setup: $setup, punchline: $punchline, category: $category)';
 }
