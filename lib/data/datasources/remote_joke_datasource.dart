@@ -1,24 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import '../models/joke_model.dart';
-import '../../core/network/network_logger_interceptor.dart';
 
 /// Gerçek API'den veri çeken data source
 /// Official Joke API kullanıyor: https://official-joke-api.appspot.com
+/// @lazySingleton - İlk kullanımda oluşturulur, tek instance
+@lazySingleton
 class RemoteJokeDataSource {
   final Dio dio;
-  static const String baseUrl = 'https://official-joke-api.appspot.com';
 
-  RemoteJokeDataSource({Dio? dio})
-    : dio =
-          dio ??
-                Dio(
-                  BaseOptions(
-                    baseUrl: baseUrl,
-                    connectTimeout: const Duration(seconds: 5),
-                    receiveTimeout: const Duration(seconds: 3),
-                  ),
-                )
-            ..interceptors.add(NetworkLoggerInterceptor());
+  /// Injectable otomatik olarak Dio'yu inject eder
+  RemoteJokeDataSource(this.dio);
 
   /// Random bir espri getir
   Future<JokeModel> getRandomJoke() async {
