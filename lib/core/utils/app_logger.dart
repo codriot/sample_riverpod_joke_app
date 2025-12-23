@@ -1,14 +1,17 @@
 import 'package:logger/logger.dart';
 import 'package:flutter/foundation.dart';
+import 'log_storage.dart';
 
 /// Global logger instance
 /// Büyük projelerde tüm log işlemleri merkezi olarak yönetilir
 /// Development'ta verbose, production'da sadece error logları
+/// Loglar aynı zamanda LogStorage'a da kaydedilir (debug console için)
 class AppLogger {
   static final AppLogger _instance = AppLogger._internal();
   factory AppLogger() => _instance;
 
   late final Logger _logger;
+  final _logStorage = LogStorage();
 
   AppLogger._internal() {
     _logger = Logger(
@@ -28,26 +31,71 @@ class AppLogger {
   /// Debug level log
   void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.d(message, error: error, stackTrace: stackTrace);
+    _logStorage.addLog(
+      LogEntry(
+        timestamp: DateTime.now(),
+        level: LogLevel.debug,
+        message: message.toString(),
+        error: error,
+        stackTrace: stackTrace,
+      ),
+    );
   }
 
   /// Info level log
   void i(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.i(message, error: error, stackTrace: stackTrace);
+    _logStorage.addLog(
+      LogEntry(
+        timestamp: DateTime.now(),
+        level: LogLevel.info,
+        message: message.toString(),
+        error: error,
+        stackTrace: stackTrace,
+      ),
+    );
   }
 
   /// Warning level log
   void w(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.w(message, error: error, stackTrace: stackTrace);
+    _logStorage.addLog(
+      LogEntry(
+        timestamp: DateTime.now(),
+        level: LogLevel.warning,
+        message: message.toString(),
+        error: error,
+        stackTrace: stackTrace,
+      ),
+    );
   }
 
   /// Error level log
   void e(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.e(message, error: error, stackTrace: stackTrace);
+    _logStorage.addLog(
+      LogEntry(
+        timestamp: DateTime.now(),
+        level: LogLevel.error,
+        message: message.toString(),
+        error: error,
+        stackTrace: stackTrace,
+      ),
+    );
   }
 
   /// Fatal error log (WTF = What a Terrible Failure)
   void f(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _logger.f(message, error: error, stackTrace: stackTrace);
+    _logStorage.addLog(
+      LogEntry(
+        timestamp: DateTime.now(),
+        level: LogLevel.fatal,
+        message: message.toString(),
+        error: error,
+        stackTrace: stackTrace,
+      ),
+    );
   }
 }
 

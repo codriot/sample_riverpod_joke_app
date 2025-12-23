@@ -3,17 +3,24 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_routes.dart';
 import '../screens/splash_screen.dart';
 import '../screens/jokes_screen.dart';
+import '../widgets/debug_overlay.dart';
 
 /// GoRouter yapılandırması
 /// Tüm route'ları ve navigasyon kurallarını tanımlar
 final goRouter = GoRouter(
   initialLocation: AppRoutes.splash,
   routes: [
-    // Splash Screen - Ana sayfa
-    GoRoute(path: AppRoutes.splash, name: AppRoutes.splashName, builder: (context, state) => const SplashScreen()),
+    // ShellRoute ile tüm sayfaları DebugOverlay ile wrap ediyoruz
+    ShellRoute(
+      builder: (context, state, child) => DebugOverlay(child: child),
+      routes: [
+        // Splash Screen - Ana sayfa
+        GoRoute(path: AppRoutes.splash, name: AppRoutes.splashName, builder: (context, state) => const SplashScreen()),
 
-    // Jokes Screen - Ana uygulama ekranı
-    GoRoute(path: AppRoutes.jokes, name: AppRoutes.jokesName, builder: (context, state) => const JokesScreen()),
+        // Jokes Screen - Ana uygulama ekranı
+        GoRoute(path: AppRoutes.jokes, name: AppRoutes.jokesName, builder: (context, state) => const JokesScreen()),
+      ],
+    ),
   ],
 
   // Hata sayfası
