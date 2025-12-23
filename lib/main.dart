@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/dependency_injection.dart';
 import 'presentation/screens/jokes_screen.dart';
 
-/// Clean Architecture ile Riverpod kullanan Espri Uygulaması
+/// Clean Architecture ile GetIt + Riverpod kullanan Espri Uygulaması
 ///
 /// Mimari Katmanlar:
 /// 1. Domain Layer (lib/domain/) - İş mantığı ve entity'ler
 /// 2. Data Layer (lib/data/) - Veri kaynakları ve repository implementasyonları
 /// 3. Presentation Layer (lib/presentation/) - UI ve state management
+/// 
+/// Dependency Injection: GetIt (Service Locator Pattern)
+/// State Management: Riverpod (Provider Pattern)
 void main() {
+  // GetIt ile dependency injection setup
+  setupDependencyInjection();
+  
   runApp(
     // ProviderScope: Riverpod'un tüm provider'larını uygulamaya sağlar
     const ProviderScope(child: MyApp()),

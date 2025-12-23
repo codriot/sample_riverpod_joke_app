@@ -1,48 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dio/dio.dart';
-import '../../data/datasources/remote_joke_datasource.dart';
-import '../../data/repositories/joke_repository_impl.dart';
+import '../../core/dependency_injection.dart';
 import '../../domain/entities/joke.dart';
 import '../../domain/repositories/joke_repository.dart';
 
-/// Provider'lar - Dependency Injection için
-/// Riverpod ile bağımlılıkları yönetiyoruz
+/// Provider'lar - State Management için
+/// Dependency Injection: GetIt ile yapılıyor
+/// State Management: Riverpod ile yapılıyor
 
-/// Dio instance provider
-final dioProvider = Provider<Dio>((ref) {
-  return Dio(
-    BaseOptions(
-      baseUrl: 'https://official-joke-api.appspot.com',
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 3),
-    ),
-  );
-});
-
-/// Data source provider - Gerçek API kullanıyor
-final jokeDataSourceProvider = Provider<RemoteJokeDataSource>((ref) {
-  final dio = ref.watch(dioProvider);
-  return RemoteJokeDataSource(dio: dio);
-});
-
-/// Repository provider
-/// DataSource'u inject ediyor
-final jokeRepositoryProvider = Provider<JokeRepository>((ref) {
-  final dataSource = ref.watch(jokeDataSourceProvider);
-  return JokeRepositoryImpl(dataSource);
-});
+/// Repository'yi GetIt'ten al
+/// GetIt service locator pattern kullanıyor
+JokeRepository get _repository => getIt<JokeRepository>();
 
 /// Tüm esprileri getiren provider
 /// AsyncValue ile loading, error ve data state'lerini otomatik yönetir
+/// Repository GetIt'ten geliyor
 final jokesProvider = FutureProvider<List<Joke>>((ref) async {
-  final repository = ref.watch(jokeRepositoryProvider);
-  return await repository.getAllJokes();
+  return await _repository.getAllJokes();
 });
 
 /// Kategorileri getiren provider
+/// Repository GetIt'ten geliyor
 final categoriesProvider = FutureProvider<List<String>>((ref) async {
-  final repository = ref.watch(jokeRepositoryProvider);
-  return await repository.getCategories();
+  return await _repository.getCategories();
 });
 
 /// Seçili kategori için state provider
@@ -50,13 +29,13 @@ final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 
 /// Filtrelenmiş esprileri getiren provider
 /// Seçili kategoriye göre esprileri filtreler
+/// Repository GetIt'ten geliyor, selectedCategory Riverpod'dan
 final filteredJokesProvider = FutureProvider<List<Joke>>((ref) async {
-  final repository = ref.watch(jokeRepositoryProvider);
   final selectedCategory = ref.watch(selectedCategoryProvider);
 
   if (selectedCategory == null || selectedCategory == 'Tümü') {
-    return await repository.getAllJokes();
+    return await _repository.getAllJokes();
   } else {
-    return await repository.getJokesByCategory(selectedCategory);
+    return await _repository.getJokesByCategory(selectedCategory);
   }
 });
