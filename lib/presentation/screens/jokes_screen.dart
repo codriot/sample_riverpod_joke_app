@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/joke_providers.dart';
 import '../widgets/joke_card.dart';
+import '../widgets/shimmer_placeholders.dart';
 
 /// Ana ekran - Esprileri listeler
 class JokesScreen extends ConsumerWidget {
@@ -64,7 +65,7 @@ class JokesScreen extends ConsumerWidget {
                 ),
               );
             },
-            loading: () => const SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
+            loading: () => const CategoryChipShimmer(),
             error: (error, stack) => const SizedBox.shrink(),
           ),
 
@@ -96,13 +97,8 @@ class JokesScreen extends ConsumerWidget {
                   },
                 );
               },
-              // Yüklenirken
-              loading: () => const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Espriler yükleniyor...')],
-                ),
-              ),
+              // Yüklenirken - Shimmer placeholder
+              loading: () => const JokesListShimmer(),
               // Hata oluştuğunda
               error: (error, stack) => Center(
                 child: Column(

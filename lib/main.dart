@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/dependency_injection.dart';
-import 'presentation/screens/jokes_screen.dart';
+import 'presentation/screens/splash_screen.dart';
 
 /// Clean Architecture ile GetIt + Riverpod kullanan Espri Uygulaması
 ///
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
         ),
       ),
-      home: const JokesScreen(),
+      home: const SplashScreen(), // İlk ekran olarak splash screen
     );
   }
 }

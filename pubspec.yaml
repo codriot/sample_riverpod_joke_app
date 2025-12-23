@@ -41,6 +41,9 @@ dependencies:
   # HTTP client
   dio: ^5.7.0
   get_it: ^9.2.0
+  
+  # Shimmer effect for loading
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -52,6 +55,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  
+  # Splash screen configuration
+  flutter_native_splash: ^2.4.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -94,3 +100,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Flutter Native Splash Configuration
+flutter_native_splash:
+  color: "#673AB7"  # Deep Purple
+  #image: assets/splash_logo.png  # Logo opsiyonel
+  android: true
+  ios: true
+  web: false
+  
+  android_12:
+    color: "#673AB7"
+    #image: assets/splash_logo.png

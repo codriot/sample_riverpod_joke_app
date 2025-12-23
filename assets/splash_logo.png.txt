@@ -1,0 +1,4 @@
+Bu dosya placeholder'dır. Gerçek bir logo eklemek için:
+1. 512x512 PNG logo'nuzu hazırlayın
+2. Bu dosyayı silin ve yerine logo'nuzu splash_logo.png olarak kaydedin
+3. flutter pub run flutter_native_splash:create komutunu çalıştırın
