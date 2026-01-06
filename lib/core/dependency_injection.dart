@@ -50,6 +50,7 @@ abstract class DioModule {
     return dio;
   }
 }
+
 /// Repository'yi al:
 /// final repository = getIt<JokeRepository>();
 /// 
