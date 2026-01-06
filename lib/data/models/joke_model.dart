@@ -1,32 +1,28 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/joke.dart';
 
-/// Data katmanındaki model sınıfı
-/// Domain entity'sinden farklı olarak JSON dönüşümü gibi veri işlemleri içerir
-class JokeModel {
-  final int id;
-  final String setup;
-  final String punchline;
-  final String category;
+part 'joke_model.freezed.dart';
+part 'joke_model.g.dart';
 
-  const JokeModel({required this.id, required this.setup, required this.punchline, required this.category});
+/// Data katmanındaki model sınıfı
+/// Freezed ile immutable, copyWith, equality, serialization otomatik oluşturulur
+@freezed
+class JokeModel with _$JokeModel {
+  const factory JokeModel({
+    required int id,
+    required String setup,
+    required String punchline,
+    @JsonKey(name: 'type') required String category, // API'de 'type' olarak geliyor
+  }) = _JokeModel;
+
+  /// Private constructor for methods
+  const JokeModel._();
+
+  /// JSON'dan model oluşturma (json_serializable otomatik generate eder)
+  factory JokeModel.fromJson(Map<String, dynamic> json) => _$JokeModelFromJson(json);
 
   /// Model'den domain entity'sine dönüşüm
   Joke toEntity() {
     return Joke(id: id, setup: setup, punchline: punchline, category: category);
-  }
-
-  /// JSON'dan model oluşturma (API entegrasyonu için)
-  factory JokeModel.fromJson(Map<String, dynamic> json) {
-    return JokeModel(
-      id: json['id'] as int,
-      setup: json['setup'] as String,
-      punchline: json['punchline'] as String,
-      category: json['type'] as String, // API'de 'type' olarak geliyor
-    );
-  }
-
-  /// Model'i JSON'a dönüştürme
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'setup': setup, 'punchline': punchline, 'category': category};
   }
 }

@@ -1,3 +1,8 @@
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
+import '../../core/errors/exceptions.dart';
+import '../../core/errors/failures.dart';
 import '../../domain/entities/joke.dart';
 import '../../domain/repositories/joke_repository.dart';
 import '../datasources/remote_joke_datasource.dart';
@@ -5,49 +10,105 @@ import '../datasources/remote_joke_datasource.dart';
 /// Repository'nin implementation'ı
 /// Domain katmanındaki interface'i implement eder ve data source'u kullanır
 /// Bu sayede domain katmanı veri kaynağından bağımsız kalır
+/// Exception'ları yakalayıp Failure'a dönüştürür
+/// @LazySingleton - Interface'e register eder
+@LazySingleton(as: JokeRepository)
 class JokeRepositoryImpl implements JokeRepository {
   final RemoteJokeDataSource dataSource;
 
+  /// Injectable otomatik olarak RemoteJokeDataSource'u inject eder
   JokeRepositoryImpl(this.dataSource);
 
   @override
-  Future<List<Joke>> getAllJokes() async {
+  Future<Either<Failure, List<Joke>>> getAllJokes() async {
     try {
       final jokeModels = await dataSource.getAllJokes();
       // Model'leri entity'lere dönüştür
-      return jokeModels.map((model) => model.toEntity()).toList();
+      final jokes = jokeModels.map((model) => model.toEntity()).toList();
+      return Right(jokes);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on TimeoutException catch (e) {
+      return Left(TimeoutFailure(message: e.message));
     } catch (e) {
-      // Gerçek uygulamada custom exception'lar kullanılabilir
-      throw Exception('Espriler yüklenirken hata oluştu: $e');
+      return Left(UnexpectedFailure(message: 'Beklenmeyen hata: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<Joke>> getJokesByCategory(String category) async {
+  Future<Either<Failure, List<Joke>>> getJokesByCategory(String category) async {
     try {
       final jokeModels = await dataSource.getJokesByCategory(category);
-      return jokeModels.map((model) => model.toEntity()).toList();
+      final jokes = jokeModels.map((model) => model.toEntity()).toList();
+      return Right(jokes);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
     } catch (e) {
-      throw Exception('Kategoriye göre espriler yüklenirken hata oluştu: $e');
+      return Left(UnexpectedFailure(message: 'Beklenmeyen hata: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Joke?> getJokeById(int id) async {
+  Future<Either<Failure, Joke>> getJokeById(int id) async {
     try {
       final jokeModel = await dataSource.getJokeById(id);
-      return jokeModel?.toEntity();
+      if (jokeModel == null) {
+        return Left(ServerFailure(message: 'Espri bulunamadı', statusCode: 404));
+      }
+      return Right(jokeModel.toEntity());
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
-      throw Exception('Espri yüklenirken hata oluştu: $e');
+      return Left(UnexpectedFailure(message: 'Beklenmeyen hata: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<String>> getCategories() async {
+  Future<Either<Failure, List<String>>> getCategories() async {
     try {
-      return await dataSource.getCategories();
+      final categories = await dataSource.getCategories();
+      return Right(categories);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
-      throw Exception('Kategoriler yüklenirken hata oluştu: $e');
+      return Left(UnexpectedFailure(message: 'Beklenmeyen hata: ${e.toString()}'));
+    }
+  }
+
+  /// DioException'ları Failure'a dönüştür
+  Failure _handleDioError(DioException error) {
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return const TimeoutFailure();
+
+      case DioExceptionType.connectionError:
+        return const NetworkFailure();
+
+      case DioExceptionType.badResponse:
+        return ServerFailure(
+          message: 'Sunucu hatası: ${error.response?.statusMessage ?? 'Bilinmeyen hata'}',
+          statusCode: error.response?.statusCode,
+        );
+
+      case DioExceptionType.cancel:
+        return const UnexpectedFailure(message: 'İstek iptal edildi');
+
+      default:
+        return UnexpectedFailure(message: error.message ?? 'Bilinmeyen bir hata oluştu');
     }
   }
 }

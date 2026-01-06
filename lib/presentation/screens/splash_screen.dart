@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/constants/app_routes.dart';
 import 'dart:async';
-import 'jokes_screen.dart';
 
 /// Splash Screen - Uygulama açılış ekranı
 /// 3 saniye animasyonlu logo gösterir sonra ana ekrana geçer
@@ -55,7 +56,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     // 3 saniye sonra ana ekrana geç
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const JokesScreen()));
+        context.go(AppRoutes.jokes);
       }
     });
   }

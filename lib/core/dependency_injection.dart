@@ -1,44 +1,55 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import '../data/datasources/remote_joke_datasource.dart';
-import '../data/repositories/joke_repository_impl.dart';
-import '../domain/repositories/joke_repository.dart';
+import 'package:injectable/injectable.dart';
+import 'config/env_config.dart';
+import 'network/network_logger_interceptor.dart';
+import 'utils/app_logger.dart';
+
+import 'dependency_injection.config.dart';
 
 /// GetIt service locator instance
-/// Tüm dependency'leri burada register ediyoruz
+/// Injectable ile otomatik olarak doldurulur
 final getIt = GetIt.instance;
 
 /// Dependency Injection setup
-/// Uygulama başlangıcında çağrılmalı
+/// Injectable ile otomatik kod üretimi kullanıyor
+/// @InjectableInit annotation'ı ile configure edilir
+@InjectableInit(initializerName: 'init', preferRelativeImports: true, asExtension: true)
 void setupDependencyInjection() {
-  // 1. Dio instance (Singleton)
-  // Tek bir instance oluşturulur ve her yerde aynısı kullanılır
-  getIt.registerSingleton<Dio>(
-    Dio(
-      BaseOptions(
-        baseUrl: 'https://official-joke-api.appspot.com',
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 3),
-      ),
-    ),
-  );
-
-  // 2. Remote Data Source (Singleton)
-  // Dio'yu inject ediyor
-  getIt.registerSingleton<RemoteJokeDataSource>(
-    RemoteJokeDataSource(dio: getIt<Dio>()),
-  );
-
-  // 3. Repository (Singleton)
-  // Data source'u inject ediyor
-  // Interface'e register ediyoruz, implementation'ı veriyoruz
-  getIt.registerSingleton<JokeRepository>(
-    JokeRepositoryImpl(getIt<RemoteJokeDataSource>()),
-  );
+  logger.d('Setting up dependencies with Injectable...');
+  getIt.init();
+  logger.d('Injectable setup completed');
 }
 
-/// Kullanım örnekleri:
-/// 
+/// Dio Module - Dio instance'ı üretir
+/// @module annotation'ı ile Injectable'a harici dependency olduğunu bildiriyoruz
+@module
+abstract class DioModule {
+  @lazySingleton
+  Dio get dio {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: EnvConfig.apiBaseUrl,
+        connectTimeout: Duration(seconds: EnvConfig.connectTimeout),
+        receiveTimeout: Duration(seconds: EnvConfig.receiveTimeout),
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      ),
+    );
+
+    // Network logger interceptor ekle
+    dio.interceptors.add(NetworkLoggerInterceptor());
+
+    // Debug mode'da ek logging
+    if (EnvConfig.isDebugMode) {
+      dio.interceptors.add(
+        LogInterceptor(requestBody: true, responseBody: true, error: true, logPrint: (obj) => logger.d(obj)),
+      );
+    }
+
+    logger.d('Dio configured with base URL: ${EnvConfig.apiBaseUrl}');
+    return dio;
+  }
+}
 /// Repository'yi al:
 /// final repository = getIt<JokeRepository>();
 /// 

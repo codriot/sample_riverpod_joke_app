@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../domain/entities/joke.dart';
 
 /// Tek bir espriyi gösteren card widget'ı
@@ -76,7 +77,7 @@ class _JokeCardState extends State<JokeCard> {
                         color: Theme.of(context).colorScheme.primary,
                         height: 1.4,
                       ),
-                    ),
+                    ).animate().slideY(duration: 300.ms),
                   ],
                 ),
                 crossFadeState: _showPunchline ? CrossFadeState.showSecond : CrossFadeState.showFirst,
