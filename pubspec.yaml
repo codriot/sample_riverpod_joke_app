@@ -44,10 +44,11 @@ dependencies:
   # Dependency injection
   get_it: ^9.2.0
   
-  # Shimmer effect for loading
-  shimmer: ^3.0.0
+  # Skeleton loading effect
+  skeletonizer: ^2.1.2
   
-  # Lottie animations
+  # animations
+  flutter_animate: ^4.5.2
   lottie: ^3.1.3
   
   # Custom pull to refresh
